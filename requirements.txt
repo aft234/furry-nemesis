@@ -1,5 +1,6 @@
 Mako==0.7.3
 MarkupSafe==0.15
 distribute==0.6.31
+requests==1.1.0
 web.py==0.37
 wsgiref==0.1.2
