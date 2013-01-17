@@ -1,9 +1,8 @@
 # Import modules/packages
-
-# Munge our path so we can find the templates
 import web, requests, json, urllib2, redis
+# Munge our path so we can find the templates
 from templates import render
-
+# Redis
 db = redis.StrictRedis(host='localhost', port=6379, db=0)
 
 # URL Structures
@@ -21,7 +20,6 @@ singly_client_secret = "ca776b492e387af88ffc1afb816df605"
 redirect_uri = "http://0.0.0.0:8080/bouncer"
 service = "google"
 scope = "https://www.googleapis.com/auth/userinfo.profile+https://www.googleapis.com/auth/drive+https://www.googleapis.com/auth/drive.file"
-singly_access_token = "UvW4HFHbswLQqTdIXl8LJZMfdA4.-vRGOZhTa52672030bb46b49744a964a4acde70e61b4ccfa5d4e65296b4db3687b1ba0b347359873bf3e747f5331eb54a29a7f687297cf897c3f3cf2aec263277b4426c11c194e804361beca62c95ff276d6d36c780c73e9890abb47fe94d5c9b1511afd"
 
 def google_token ():
     tk = db.get("google_token")
@@ -66,25 +64,17 @@ class Bouncer:
 class Export:
     def GET (self):
         post_url = "https://www.googleapis.com/upload/drive/v2/files?access_token={access_token}&convert=true".format(access_token=google_token())
-        print post_url
-        payload = {
-            "title": "testing.doc",
-            "description": "Stuff about the file",
-            "mimeType": "application/msword"
-        }
-
         headers = {"content-type": "text/html"}
-
         r = requests.post(post_url, headers=headers)
-        file_id = r.json()["id"]
-        db.set("current_file_id", file_id)
+        db.set("current_file_id", r.json()["id"])
+
         f = open("testing.doc", "r")
         text = f.read()
-
         headers = {"content-type": "multipart/form-data"}
-        put_url = "https://www.googleapis.com/upload/drive/v2/files/{id}?access_token={access_token}&convert=true&uploadType=media".format(id=file_id, access_token=google_token())
+        put_url = "https://www.googleapis.com/upload/drive/v2/files/{id}?access_token={access_token}&convert=true&uploadType=media".format(id=db.get("current_file_id"), access_token=google_token())
 
         r = requests.put(put_url, data=text, headers=headers)
+
         return "Exporting...Check your google drive..."
 
 class Update:
@@ -104,6 +94,7 @@ class Update:
 
         headers = {"content-type": "multipart/form-data"}
         r = requests.put(put_url, data=content_updated, headers=headers)
+
         return "Just updated that biatch. \n\nBut hold up.\n\nIt live updates too.\n\nSay whaaaat.\n\nYeah playa\n\nDidn't see it? Saad...hit that update again for everyone (refresh the page)"
 
 
