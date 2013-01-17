@@ -1,7 +1,10 @@
 # Import modules/packages
-import web, requests, json, urllib2
+
 # Munge our path so we can find the templates
+import web, requests, json, urllib2, redis
 from templates import render
+
+db = redis.StrictRedis(host='localhost', port=6379, db=0)
 
 # URL Structures
 urls = (
@@ -19,7 +22,15 @@ redirect_uri = "http://0.0.0.0:8080/bouncer"
 service = "google"
 scope = "https://www.googleapis.com/auth/userinfo.profile+https://www.googleapis.com/auth/drive+https://www.googleapis.com/auth/drive.file"
 singly_access_token = "UvW4HFHbswLQqTdIXl8LJZMfdA4.-vRGOZhTa52672030bb46b49744a964a4acde70e61b4ccfa5d4e65296b4db3687b1ba0b347359873bf3e747f5331eb54a29a7f687297cf897c3f3cf2aec263277b4426c11c194e804361beca62c95ff276d6d36c780c73e9890abb47fe94d5c9b1511afd"
-google_singly_access_token = "ya29.AHES6ZSbUAALvcbIz06xGz_rz5tntL2nftZPIBvMUqJZSqcXc44N2Sc"
+
+def google_token ():
+    tk = db.get("google_token")
+    if tk is None:
+        return "NO_TOKEN_FOUND"
+    return tk
+
+def set_google_token (tk):
+    db.set("google_token", tk)
 
 # Classes
 class Index:
@@ -48,11 +59,20 @@ class Bouncer:
 
         token_convert_url = "https://api.singly.com/oauth/access_token?client_id={client_id}&client_secret={client_secret}&code={code}&profile=google&auth=true".format(client_id=singly_client_id, client_secret=singly_client_secret, code=params.code)
         r = requests.post(token_convert_url)
-        return r.json()["profile"]["services"]["google"]["auth"]["access_token"]
+        tk = r.json()["profile"]["services"]["google"]["auth"]["access_token"]
+        set_google_token(tk)
+        return google_token()
 
 class Export:
     def GET (self):
-        post_url = "https://www.googleapis.com/upload/drive/v2/files?access_token={access_token}&convert=true".format(access_token=google_singly_access_token)
+        post_url = "https://www.googleapis.com/upload/drive/v2/files?access_token={access_token}&convert=true".format(access_token=google_token())
+        print post_url
+        payload = {
+            "title": "testing.doc",
+            "description": "Stuff about the file",
+            "mimeType": "application/msword"
+        }
+
         headers = {"content-type": "text/html"}
 
         r = requests.post(post_url, headers=headers)
@@ -62,14 +82,15 @@ class Export:
         text = f.read()
 
         headers = {"content-type": "multipart/form-data"}
-        put_url = "https://www.googleapis.com/upload/drive/v2/files/{id}?access_token={access_token}&convert=true&uploadType=media".format(id=file_id, access_token=google_singly_access_token)
+        put_url = "https://www.googleapis.com/upload/drive/v2/files/{id}?access_token={access_token}&convert=true&uploadType=media".format(id=file_id, access_token=google_token())
+
         r = requests.put(put_url, data=text, headers=headers)
         return r.text
 
 class Update:
     def GET (self):
         file_id = "1gjUJpdZqp7W5LsF0Hhk26jtEIEVAmBc5MN5R3pS4fV8"
-        get_url = "https://www.googleapis.com/upload/drive/v2/files/{id}?access_token={access_token}".format(id=file_id, access_token=google_singly_access_token)
+        get_url = "https://www.googleapis.com/upload/drive/v2/files/{id}?access_token={access_token}".format(id=file_id, access_token=google_token())
 
         r = requests.get(get_url)
         return r.text
