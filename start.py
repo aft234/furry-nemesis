@@ -1,7 +1,6 @@
 # Import modules/packages
-
-# Munge our path so we can find the templates
 import web, requests, json, urllib2
+# Munge our path so we can find the templates
 from templates import render
 
 # URL Structures
@@ -11,6 +10,7 @@ urls = (
     "/connect",         "Connect",
     "/bouncer",         "Bouncer",
     "/export",          "Export",
+    "/update",          "Update",
 )
 
 singly_client_id = "87f100bac9ebc1794e6db565127a3737"
@@ -53,25 +53,26 @@ class Bouncer:
 class Export:
     def GET (self):
         post_url = "https://www.googleapis.com/upload/drive/v2/files?access_token={access_token}&convert=true".format(access_token=google_singly_access_token)
-        print post_url
-        payload = {
-            "title": "testing.doc",
-            "description": "Stuff about the file",
-            "mimeType": "application/msword"
-        }
         headers = {"content-type": "text/html"}
-        # files = {"file": ("testing.doc", open("testing.txt", "rb"))}
-        r = requests.post(post_url, headers=headers)
 
+        r = requests.post(post_url, headers=headers)
         file_id = r.json()["id"]
+
         f = open("testing.doc", "r")
         text = f.read()
+
         headers = {"content-type": "multipart/form-data"}
         put_url = "https://www.googleapis.com/upload/drive/v2/files/{id}?access_token={access_token}&convert=true&uploadType=media".format(id=file_id, access_token=google_singly_access_token)
-
         r = requests.put(put_url, data=text, headers=headers)
         return r.text
 
+class Update:
+    def GET (self):
+        file_id = "1gjUJpdZqp7W5LsF0Hhk26jtEIEVAmBc5MN5R3pS4fV8"
+        get_url = "https://www.googleapis.com/upload/drive/v2/files/{id}?access_token={access_token}".format(id=file_id, access_token=google_singly_access_token)
+
+        r = requests.get(get_url)
+        return r.text
 
 # If this module is called directly, start the app
 if __name__ == "__main__":
