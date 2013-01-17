@@ -43,7 +43,12 @@ class Connect:
 class Bouncer:
     def GET (self):
         params = web.input(code=None)
-        return params.code
+        if params.code is None:
+            return "No code found.."
+
+        token_convert_url = "https://api.singly.com/oauth/access_token?client_id={client_id}&client_secret={client_secret}&code={code}&profile=google&auth=true".format(client_id=singly_client_id, client_secret=singly_client_secret, code=params.code)
+        r = requests.post(token_convert_url)
+        return r.json()["profile"]["services"]["google"]["auth"]["access_token"]
 
 class Export:
     def GET (self):
