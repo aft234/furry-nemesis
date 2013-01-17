@@ -77,7 +77,7 @@ class Export:
 
         r = requests.post(post_url, headers=headers)
         file_id = r.json()["id"]
-
+        db.set("current_file_id", file_id)
         f = open("testing.doc", "r")
         text = f.read()
 
@@ -85,18 +85,27 @@ class Export:
         put_url = "https://www.googleapis.com/upload/drive/v2/files/{id}?access_token={access_token}&convert=true&uploadType=media".format(id=file_id, access_token=google_token())
 
         r = requests.put(put_url, data=text, headers=headers)
-        return r.text
+        return "Exporting...Check your google drive..."
 
 class Update:
     def GET (self):
-        file_id = "1gjUJpdZqp7W5LsF0Hhk26jtEIEVAmBc5MN5R3pS4fV8"
+        file_id = db.get("current_file_id")
         get_url = "https://www.googleapis.com/drive/v2/files/{id}?access_token={access_token}".format(id=file_id, access_token=google_token())
 
         r = requests.get(get_url)
-        download_url = r.json()["exportLinks"]["text/plain"]
-        return download_url
+        download_url = "{original_link}&access_token={access_token}".format(original_link=r.json()["exportLinks"]["text/plain"], access_token=google_token())
         r = requests.get(download_url)
-        return r.text
+        with open("Untitled.txt", "wb") as code:
+            code.write(r.content)
+
+        content_updated = "{original_content}\n\n\n\n\nIMAGINE...a new fact....\nwhattup sonnnn\ndidn't think we could do it could you\nthat.\nis.\nhow.\nwe.\nDO.\n\nBAZINGA!".format(original_content=r.content)
+
+        put_url = "https://www.googleapis.com/upload/drive/v2/files/{id}?access_token={access_token}&convert=true&uploadType=media".format(id=file_id, access_token=google_token())
+
+        headers = {"content-type": "multipart/form-data"}
+        r = requests.put(put_url, data=content_updated, headers=headers)
+        return "Just updated that biatch. \n\nBut hold up.\n\nIt live updates too.\n\nSay whaaaat.\n\nYeah playa"
+
 
 # If this module is called directly, start the app
 if __name__ == "__main__":
