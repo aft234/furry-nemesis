@@ -1,7 +1,7 @@
 # Import modules/packages
 
 # Munge our path so we can find the templates
-import web, requests
+import web, requests, json
 from templates import render
 
 # URL Structures
@@ -47,13 +47,20 @@ class Bouncer:
 
 class Export:
     def GET (self):
-        url = "https://www.googleapis.com/drive/v2/files?access_token={access_token}&convert=true".format(access_token=google_singly_access_token)
-        data = '{\
-          "title": "testing",\
-          "mimeType": "text/plain",\
-          "description": "Stuff about the file"\
-        }'
-        r = requests.post(url, data=data)
+        post_url = "https://www.googleapis.com/upload/drive/v2/files?access_token={access_token}&convert=true".format(access_token=google_singly_access_token)
+        data = {
+          "title": "testing.txt",
+          "mimeType": "text/plain",
+          "description": "Stuff about the file"
+        }
+        headers = {"content/type": "text/plain"}
+        files = {"file": ("testing.txt", open("testing.txt", "rb"))}
+        r = requests.post(post_url, data=json.dumps(data), headers=headers)
+
+        print r.text
+        file_id = r.json()["id"]
+        put_url = "https://www.googleapis.com/upload/drive/v2/files/{id}?access_token={access_token}&convert=true&uploadType=media".format(id=file_id, access_token=google_singly_access_token)
+        r = requests.put(put_url, headers=headers, data="shit gets done")
         return r.text
 
 
