@@ -19,7 +19,7 @@ redirect_uri = "http://0.0.0.0:8080/bouncer"
 service = "google"
 scope = "https://www.googleapis.com/auth/userinfo.profile+https://www.googleapis.com/auth/drive+https://www.googleapis.com/auth/drive.file"
 singly_access_token = "UvW4HFHbswLQqTdIXl8LJZMfdA4.-vRGOZhTa52672030bb46b49744a964a4acde70e61b4ccfa5d4e65296b4db3687b1ba0b347359873bf3e747f5331eb54a29a7f687297cf897c3f3cf2aec263277b4426c11c194e804361beca62c95ff276d6d36c780c73e9890abb47fe94d5c9b1511afd"
-google_singly_access_token = "ya29.AHES6ZTrqE91e1PIDG3zDCDck4liEE8HxM7sJ_zvmZM-VCI2IkoneA"
+google_singly_access_token = "ya29.AHES6ZSbUAALvcbIz06xGz_rz5tntL2nftZPIBvMUqJZSqcXc44N2Sc"
 
 # Classes
 class Index:
