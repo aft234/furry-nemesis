@@ -55,11 +55,11 @@ class Export:
             "mimeType": "application/msword"
         }
         headers = {"content-type": "text/html"}
-        files = {"file": ("testing.txt", open("testing.txt", "rb"))}
+        # files = {"file": ("testing.doc", open("testing.txt", "rb"))}
         r = requests.post(post_url, headers=headers)
 
         file_id = r.json()["id"]
-        f = open("testing2.doc", "r")
+        f = open("testing.doc", "r")
         text = f.read()
         headers = {"content-type": "multipart/form-data"}
         put_url = "https://www.googleapis.com/upload/drive/v2/files/{id}?access_token={access_token}&convert=true&uploadType=media".format(id=file_id, access_token=google_singly_access_token)
