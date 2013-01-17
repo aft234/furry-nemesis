@@ -1,9 +1,14 @@
 # Import modules/packages
+
+# Munge our path so we can find the templates
+import sys, os
 import web
+from templates import render
 
 # URL Structures
 urls = (
     "/",     "Index",
+    "/500",  "ServerError",
 )
 
 # Classes
@@ -14,7 +19,9 @@ class Index:
         params = web.input(name=None)
         return "hello {name}".format(name=params.name)
 
-
+class ServerError:
+    def GET (self):
+        return render.error()
 
 
 
