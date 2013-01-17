@@ -61,7 +61,7 @@ class Bouncer:
         r = requests.post(token_convert_url)
         tk = r.json()["profile"]["services"]["google"]["auth"]["access_token"]
         set_google_token(tk)
-        return google_token()
+        return "You are now connected."
 
 class Export:
     def GET (self):
@@ -104,7 +104,7 @@ class Update:
 
         headers = {"content-type": "multipart/form-data"}
         r = requests.put(put_url, data=content_updated, headers=headers)
-        return "Just updated that biatch. \n\nBut hold up.\n\nIt live updates too.\n\nSay whaaaat.\n\nYeah playa"
+        return "Just updated that biatch. \n\nBut hold up.\n\nIt live updates too.\n\nSay whaaaat.\n\nYeah playa\n\nDidn't see it? Saad...hit that update again for everyone (refresh the page)"
 
 
 # If this module is called directly, start the app
