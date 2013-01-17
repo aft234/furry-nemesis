@@ -1,7 +1,7 @@
 # Import modules/packages
 
 # Munge our path so we can find the templates
-import web, requests, json
+import web, requests, json, urllib2
 from templates import render
 
 # URL Structures
@@ -18,8 +18,8 @@ singly_client_secret = "ca776b492e387af88ffc1afb816df605"
 redirect_uri = "http://0.0.0.0:8080/bouncer"
 service = "google"
 scope = "https://www.googleapis.com/auth/userinfo.profile+https://www.googleapis.com/auth/drive+https://www.googleapis.com/auth/drive.file"
-singly_access_token = "8zeqaJZPMX_LB3tvDmt_U7rpPhI.jSMipJYM5e757f98c471bf80d07594f87ffe0ca7da0a0c4d6cf75d07c7762c7dcc6ef77461ee6b94acd3b6d90a79ab4f835f752ccfc707279d5bf32eec4483a69e51a99db8f4fd4bd7c2d9efe838790cb22e27302816a0f0eb119f0befd13d8484a78e0c"
-google_singly_access_token = "ya29.AHES6ZSsoAwasenVg9du_FjEAayuq6o2ex2-dPG77AThn8IXRaG1lA"
+singly_access_token = "UvW4HFHbswLQqTdIXl8LJZMfdA4.-vRGOZhTa52672030bb46b49744a964a4acde70e61b4ccfa5d4e65296b4db3687b1ba0b347359873bf3e747f5331eb54a29a7f687297cf897c3f3cf2aec263277b4426c11c194e804361beca62c95ff276d6d36c780c73e9890abb47fe94d5c9b1511afd"
+google_singly_access_token = "ya29.AHES6ZT5yMiG8lnHU6wp7x5fFV55Tw9TpJAqE4GDAakdvhZd0XyOWg"
 
 # Classes
 class Index:
@@ -48,19 +48,19 @@ class Bouncer:
 class Export:
     def GET (self):
         post_url = "https://www.googleapis.com/upload/drive/v2/files?access_token={access_token}&convert=true".format(access_token=google_singly_access_token)
+        print post_url
         data = {
-          "title": "testing.txt",
-          "mimeType": "text/plain",
-          "description": "Stuff about the file"
+            "title": "testing.doc",
+            "description": "Stuff about the file",
+            "mimeType": "application/msword"
         }
-        headers = {"content/type": "text/plain"}
-        files = {"file": ("testing.txt", open("testing.txt", "rb"))}
-        r = requests.post(post_url, data=json.dumps(data), headers=headers)
+        headers = {"content-type": "text/html"}
+        files = {"file": ("testing.doc", open("testing.doc", "rb"))}
+        r = requests.post(post_url, headers=headers)
 
-        print r.text
         file_id = r.json()["id"]
         put_url = "https://www.googleapis.com/upload/drive/v2/files/{id}?access_token={access_token}&convert=true&uploadType=media".format(id=file_id, access_token=google_singly_access_token)
-        r = requests.put(put_url, headers=headers, data="shit gets done")
+        r = requests.put(put_url, headers=headers, files=files)
         return r.text
 
 
