@@ -19,7 +19,7 @@ redirect_uri = "http://0.0.0.0:8080/bouncer"
 service = "google"
 scope = "https://www.googleapis.com/auth/userinfo.profile+https://www.googleapis.com/auth/drive+https://www.googleapis.com/auth/drive.file"
 singly_access_token = "UvW4HFHbswLQqTdIXl8LJZMfdA4.-vRGOZhTa52672030bb46b49744a964a4acde70e61b4ccfa5d4e65296b4db3687b1ba0b347359873bf3e747f5331eb54a29a7f687297cf897c3f3cf2aec263277b4426c11c194e804361beca62c95ff276d6d36c780c73e9890abb47fe94d5c9b1511afd"
-google_singly_access_token = "ya29.AHES6ZT5yMiG8lnHU6wp7x5fFV55Tw9TpJAqE4GDAakdvhZd0XyOWg"
+google_singly_access_token = "ya29.AHES6ZTrqE91e1PIDG3zDCDck4liEE8HxM7sJ_zvmZM-VCI2IkoneA"
 
 # Classes
 class Index:
@@ -49,18 +49,22 @@ class Export:
     def GET (self):
         post_url = "https://www.googleapis.com/upload/drive/v2/files?access_token={access_token}&convert=true".format(access_token=google_singly_access_token)
         print post_url
-        data = {
+        payload = {
             "title": "testing.doc",
             "description": "Stuff about the file",
             "mimeType": "application/msword"
         }
         headers = {"content-type": "text/html"}
-        files = {"file": ("testing.doc", open("testing.doc", "rb"))}
+        files = {"file": ("testing.txt", open("testing.txt", "rb"))}
         r = requests.post(post_url, headers=headers)
 
         file_id = r.json()["id"]
+        f = open("testing2.doc", "r")
+        text = f.read()
+        headers = {"content-type": "multipart/form-data"}
         put_url = "https://www.googleapis.com/upload/drive/v2/files/{id}?access_token={access_token}&convert=true&uploadType=media".format(id=file_id, access_token=google_singly_access_token)
-        r = requests.put(put_url, headers=headers, files=files)
+
+        r = requests.put(put_url, data=text, headers=headers)
         return r.text
 
 
