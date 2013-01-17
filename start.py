@@ -90,9 +90,12 @@ class Export:
 class Update:
     def GET (self):
         file_id = "1gjUJpdZqp7W5LsF0Hhk26jtEIEVAmBc5MN5R3pS4fV8"
-        get_url = "https://www.googleapis.com/upload/drive/v2/files/{id}?access_token={access_token}".format(id=file_id, access_token=google_token())
+        get_url = "https://www.googleapis.com/drive/v2/files/{id}?access_token={access_token}".format(id=file_id, access_token=google_token())
 
         r = requests.get(get_url)
+        download_url = r.json()["exportLinks"]["text/plain"]
+        return download_url
+        r = requests.get(download_url)
         return r.text
 
 # If this module is called directly, start the app
