@@ -13,7 +13,9 @@ urls = (
     "/bouncer",         "Bouncer",
     "/export",          "Export",
     "/update",          "Update",
-    "/test",            "Test"
+    "/test",            "Test",
+    "/tokens",          "Tokens",
+    "/clean",           "Clean"
 )
 
 singly_client_id = "0e1514c50a95b214f13567123dc23e87"
@@ -59,6 +61,16 @@ class Index:
 class ServerError:
     def GET (self):
         return render.error()
+
+class Tokens:
+    def GET (self):
+        return json.dumps({ "access_token" : google_token(), "refresh_token" : db.get("google_refresh_token") })
+
+class Clean:
+    def GET (self):
+        db.set("google_token", None)
+        db.set("google_refresh_token", None)
+        return "Removed all tokens"
 
 class Connect:
     def GET (self):
