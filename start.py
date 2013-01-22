@@ -13,22 +13,40 @@ urls = (
     "/bouncer",         "Bouncer",
     "/export",          "Export",
     "/update",          "Update",
+    "/test",            "Test"
 )
 
-singly_client_id = "87f100bac9ebc1794e6db565127a3737"
-singly_client_secret = "ca776b492e387af88ffc1afb816df605"
+singly_client_id = "0e1514c50a95b214f13567123dc23e87"
+singly_client_secret = "6760198d31e33e65466620095fadfefc"
+google_client_id = "366462171286.apps.googleusercontent.com"
+google_client_secret = "EKDKiG9U1O3xN3oigVe2Q-zr"
 redirect_uri = "http://0.0.0.0:8080/bouncer"
 service = "google"
-scope = "https://www.googleapis.com/auth/userinfo.profile+https://www.googleapis.com/auth/drive+https://www.googleapis.com/auth/drive.file"
+scope = "https://www.googleapis.com/auth/userinfo.profile+https://www.googleapis.com/auth/drive+https://www.googleapis.com/auth/drive.file+https://www.google.com/analytics/feeds/"
 
 def google_token ():
+    print "Fetching google access token"
     tk = db.get("google_token")
     if tk is None:
-        return "NO_TOKEN_FOUND"
+        print "Attempting to refresh old access token"
+        refresh = db.get("google_refresh_token")
+        # Refresh the tokenz
+        r = requests.post("https://accounts.google.com/o/oauth2/token", {
+            "refresh_token" : refresh,
+            "client_id" : google_client_id,
+            "client_secret" : google_client_secret,
+            "grant_type" : "refresh_token"
+        })
+        set_google_token(**r.json())
+        tk = db.get("google_token")
+    print "Returning {token}".format(token=tk)
     return tk
 
-def set_google_token (tk):
-    db.set("google_token", tk)
+def set_google_token (access_token=None, refresh_token=None, expires_in=None, **kwargs):
+    db.set("google_token", access_token)
+    db.expire("google_token", int(expires_in) - 100)
+    if refresh_token is not None:
+        db.set("google_refresh_token", refresh_token)
 
 # Classes
 class Index:
@@ -57,10 +75,15 @@ class Bouncer:
 
         token_convert_url = "https://api.singly.com/oauth/access_token?client_id={client_id}&client_secret={client_secret}&code={code}&profile=google&auth=true".format(client_id=singly_client_id, client_secret=singly_client_secret, code=params.code)
         r = requests.post(token_convert_url)
-        tk = r.json()["profile"]["services"]["google"]["auth"]["access_token"]
-        set_google_token(tk)
-        return "You are now connected."
+        blob = r.json()
+        set_google_token(**blob["profile"]["services"]["google"]["auth"])
+        return r.text
 
+class Test:
+    def GET (self):
+        url = "https://www.googleapis.com/analytics/v3/management/segments?access_token={token}".format(token=google_token())
+        r = requests.get(url)
+        return r.text
 class Export:
     def GET (self):
         post_url = "https://www.googleapis.com/upload/drive/v2/files?access_token={access_token}&convert=true".format(access_token=google_token())
